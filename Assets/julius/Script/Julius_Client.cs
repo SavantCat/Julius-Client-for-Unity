@@ -137,14 +137,18 @@ public class Julius_Client : MonoBehaviour {
 	
 	/*サーバーが起動するまで時間があるので少し待つ*/
 	private IEnumerator start_julius_server(){
-		Debug.Log ("Julius Initialize...");
-		message = "Julius Initialize...";
-		return_num = 1;
-		yield return new WaitForSeconds(wait_time);
-		Debug.Log ("Connect start");
-		message = "Connect start";
-		return_num = 1;
-		connect = initialize_julius_client();
+        while (!connect)
+        {
+			Debug.Log("Julius Initialize...");
+			message = "Julius Initialize...";
+			return_num = 1;
+			yield return new WaitForSeconds(wait_time);
+			Debug.Log("Connect start");
+			message = "Connect start";
+			return_num = 1;
+
+			connect = initialize_julius_client();
+		}
 	}
 	//--------------------------------------------------------------------
 	
