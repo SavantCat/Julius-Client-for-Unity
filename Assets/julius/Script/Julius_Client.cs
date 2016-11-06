@@ -72,7 +72,8 @@ public class Julius_Client : MonoBehaviour {
 		try{
 			julius_process = System.Diagnostics.Process.Start(info);
 		}catch(System.ComponentModel.Win32Exception w){
-			Debug.Log("Not Found." + w);
+            Debug.Log("Process Not Found. " + w);
+            Debug.Log("Path: " + info.WorkingDirectory + info.FileName);
 			message = "Not Found.";
 			return_num = 0;
 			return false;
