@@ -99,7 +99,15 @@ public class Julius_Client : MonoBehaviour {
 	/*juliusサーバーへ接続する*/
 	private bool initialize_julius_client(){
 		//TCP/IPの初期化＆juliusサーバーへ接続
-		tcpip = new TcpClient(IPAddress,port);
+        //TcpClientは例外を返す場合がある
+        try
+        {
+			tcpip = new TcpClient(IPAddress, port);
+        }
+        catch
+        {
+            tcpip = null;
+        }
 		//クライアントが取得出来たかどうか
 		if (tcpip == null) {
 			Debug.Log("Connect Fall.");
