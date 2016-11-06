@@ -184,7 +184,7 @@ public class Julius_Client : MonoBehaviour {
 	
 	/*ストリーム情報から正規表現を利用して文字列を抽出する*/
 	private string XML_search(string stream){
-		string tmp = string.Empty;
+		string tmp_l = string.Empty;
 
 		//正規表現
 		xml_data = new Regex(regular);
@@ -193,13 +193,13 @@ public class Julius_Client : MonoBehaviour {
 		while(sampling.Success){//最後まで抽出
 			//結合処理
 			for(int i = 1;i<sampling.Groups.Count;i++){//なぜかi = 1にしたらうまく行った
-				tmp += sampling.Groups[i].Value;
+				tmp_l += sampling.Groups[i].Value;
 			}
 			//順次抽出していく
 			sampling = sampling.NextMatch();
 		}
 		//最終的に結合した文字列を返す
-		return tmp;
+		return tmp_l;
 	}
 	//--------------------------------------------------------------
 
