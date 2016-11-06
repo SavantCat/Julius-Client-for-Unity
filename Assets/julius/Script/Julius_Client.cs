@@ -263,7 +263,8 @@ public class Julius_Client : MonoBehaviour {
 	}
 	
 	//終了処理と同時に実行される
-	void OnApplicationQuit() {
+    void OnDestroy()
+    {
 		if (connect) {
 			//juliusサーバーを切断
 			close_julius();
