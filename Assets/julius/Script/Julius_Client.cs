@@ -146,9 +146,11 @@ public class Julius_Client : MonoBehaviour {
 			//マルチスレッドの速度？
 			Thread.Sleep(0);
 			//ストリームの受信
-			net.Read(data, 0, data.Length);
-			stream = System.Text.Encoding.Default.GetString(data);
-			//Debug.Log (stream);
+            //受け取ったバイト数だけを文字列として解析する
+            //streamは前の状態が残っているため、受け取ったバイト数が前回より少ないときに同じ文字列が認識されてしまう
+            int charCount = net.Read(data, 0, data.Length);
+			stream = System.Text.Encoding.Default.GetString(data, 0, charCount);
+			Debug.Log (stream);
 			
 			//Debug.Log ("tmp_s : "+words)
 			tmp = string.Empty;
