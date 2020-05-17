@@ -72,7 +72,8 @@ public class Julius_Client : MonoBehaviour {
 		try{
 			julius_process = System.Diagnostics.Process.Start(info);
 		}catch(System.ComponentModel.Win32Exception w){
-			Debug.Log("Not Found." + w);
+            Debug.Log("Process Not Found. " + w);
+            Debug.Log("Path: " + info.WorkingDirectory + info.FileName);
 			message = "Not Found.";
 			return_num = 0;
 			return false;
@@ -98,7 +99,15 @@ public class Julius_Client : MonoBehaviour {
 	/*juliusサーバーへ接続する*/
 	private bool initialize_julius_client(){
 		//TCP/IPの初期化＆juliusサーバーへ接続
-		tcpip = new TcpClient(IPAddress,port);
+        //TcpClientは例外を返す場合がある
+        try
+        {
+			tcpip = new TcpClient(IPAddress, port);
+        }
+        catch
+        {
+            tcpip = null;
+        }
 		//クライアントが取得出来たかどうか
 		if (tcpip == null) {
 			Debug.Log("Connect Fall.");
@@ -128,14 +137,18 @@ public class Julius_Client : MonoBehaviour {
 	
 	/*サーバーが起動するまで時間があるので少し待つ*/
 	private IEnumerator start_julius_server(){
-		Debug.Log ("Julius Initialize...");
-		message = "Julius Initialize...";
-		return_num = 1;
-		yield return new WaitForSeconds(wait_time);
-		Debug.Log ("Connect start");
-		message = "Connect start";
-		return_num = 1;
-		connect = initialize_julius_client();
+        while (!connect)
+        {
+			Debug.Log("Julius Initialize...");
+			message = "Julius Initialize...";
+			return_num = 1;
+			yield return new WaitForSeconds(wait_time);
+			Debug.Log("Connect start");
+			message = "Connect start";
+			return_num = 1;
+
+			connect = initialize_julius_client();
+		}
 	}
 	//--------------------------------------------------------------------
 	
@@ -146,9 +159,11 @@ public class Julius_Client : MonoBehaviour {
 			//マルチスレッドの速度？
 			Thread.Sleep(0);
 			//ストリームの受信
-			net.Read(data, 0, data.Length);
-			stream = System.Text.Encoding.Default.GetString(data);
-			//Debug.Log (stream);
+            //受け取ったバイト数だけを文字列として解析する
+            //streamは前の状態が残っているため、受け取ったバイト数が前回より少ないときに同じ文字列が認識されてしまう
+            int charCount = net.Read(data, 0, data.Length);
+			stream = System.Text.Encoding.Default.GetString(data, 0, charCount);
+			Debug.Log (stream);
 			
 			//Debug.Log ("tmp_s : "+words)
 			tmp = string.Empty;
@@ -169,7 +184,7 @@ public class Julius_Client : MonoBehaviour {
 	
 	/*ストリーム情報から正規表現を利用して文字列を抽出する*/
 	private string XML_search(string stream){
-		string tmp = string.Empty;
+		string tmp_l = string.Empty;
 
 		//正規表現
 		xml_data = new Regex(regular);
@@ -178,13 +193,13 @@ public class Julius_Client : MonoBehaviour {
 		while(sampling.Success){//最後まで抽出
 			//結合処理
 			for(int i = 1;i<sampling.Groups.Count;i++){//なぜかi = 1にしたらうまく行った
-				tmp += sampling.Groups[i].Value;
+				tmp_l += sampling.Groups[i].Value;
 			}
 			//順次抽出していく
 			sampling = sampling.NextMatch();
 		}
 		//最終的に結合した文字列を返す
-		return tmp;
+		return tmp_l;
 	}
 	//--------------------------------------------------------------
 
@@ -248,7 +263,8 @@ public class Julius_Client : MonoBehaviour {
 	}
 	
 	//終了処理と同時に実行される
-	void OnApplicationQuit() {
+    void OnDestroy()
+    {
 		if (connect) {
 			//juliusサーバーを切断
 			close_julius();
